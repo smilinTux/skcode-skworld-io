@@ -1,0 +1,19 @@
+{
+  "repo": null,
+  "branch": null,
+  "path": null,
+  "generated": "2026-08-02",
+  "note": "skcode is a distributed feature with no single source repo yet (the daemon is skharness, the client is skchat-app, the operator adapter is skcapstone). Unlike the skos docs viewer, skcode's /docs.html is a static, self-contained page grounded in ADR-0001 and the skcode design spec, so there is no GitHub docs/ folder to render live. When skcode is packaged into its own repo, this manifest and docs.html will point at it.",
+  "design_sources": [
+    "https://github.com/smilinTux/sk-standards/blob/main/decisions/ADR-0001-skos-skharness-skcode-layering.md",
+    "docs/superpowers/specs/2026-07-25-skcode-remote-control-dispatch-design.md",
+    "skharness/.superpowers/sdd/skcode-p0-sessionplane-report.md"
+  ],
+  "tracking": "coord card 22731c0d (reconciled to ADR-0001)",
+  "docs": [
+    {
+      "name": "docs.html",
+      "title": "skcode - architecture, two-plane Harness, what ships today, roadmap, security"
+    }
+  ]
+}

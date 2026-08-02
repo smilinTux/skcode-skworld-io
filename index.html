@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>skcode - The Sovereign Coding Client</title>
+  <meta name="description" content="skcode is where you code by hand - the interactive, human-facing coding client of the SKWorld stack. A thin client of the skharness engine. Its read-only remote session plane ships today (skcode-hostd); interactive Code + Dispatch is on the roadmap.">
+
+  <!-- Canonical + Sitemap -->
+  <link rel="canonical" href="https://skcode.skworld.io/">
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="skcode - The Sovereign Coding Client">
+  <meta property="og:description" content="Where you code by hand. The interactive coding client of the SKWorld stack - a thin client of the skharness engine. Read-only remote session control ships today; interactive Code + Dispatch on the roadmap.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://skcode.skworld.io/">
+  <meta property="og:site_name" content="skcode · SKWorld">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:image" content="https://skcode.skworld.io/og.png">
+  <meta property="og:image:secure_url" content="https://skcode.skworld.io/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="skcode - The Sovereign Coding Client. One engine, two front doors: skos knows you, skharness builds code, skcode is where you code by hand.">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@smilinTux">
+  <meta name="twitter:title" content="skcode - The Sovereign Coding Client">
+  <meta name="twitter:description" content="Where you code by hand. A thin client of the skharness engine. Read-only remote session control ships today; interactive dispatch on the roadmap.">
+  <meta name="twitter:image" content="https://skcode.skworld.io/og.png">
+  <meta name="twitter:image:alt" content="skcode - The Sovereign Coding Client">
+  <meta name="twitter:creator" content="@smilinTux">
+
+  <!-- Theme -->
+  <meta name="theme-color" content="#0a0a1a">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⌨️</text></svg>">
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://smilintux.github.io/#organization",
+        "name": "smilinTux",
+        "url": "https://smilintux.github.io",
+        "sameAs": ["https://github.com/smilinTux"],
+        "description": "Sovereign AI infrastructure - building open, authentic, human-first technology. Home of the Pengu Empire.",
+        "foundingDate": "2024",
+        "knowsAbout": ["Sovereign AI", "AI agent infrastructure", "Coding agents", "Remote session control", "Autonomous code generation"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://skcode.skworld.io/#website",
+        "name": "skcode",
+        "url": "https://skcode.skworld.io",
+        "publisher": {"@id": "https://smilintux.github.io/#organization"},
+        "inLanguage": "en-US"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://skcode.skworld.io/#app",
+        "name": "skcode",
+        "alternateName": "Sovereign Coding Client",
+        "description": "The interactive, human-facing coding client of the SKWorld stack - where you code by hand, backed by the skharness autocode engine. A thin client, not a second engine. Its read-only remote session plane (skcode-hostd) ships today, delivered as a distributed feature across skharness, skchat-app, and skcapstone; interactive Code + Dispatch is on the roadmap.",
+        "url": "https://skcode.skworld.io",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux, macOS",
+        "releaseNotes": "Read-only remote session plane shipped (skcode-hostd P0, capauth-gated, Tailscale-only). Interactive Code + Dispatch on the roadmap.",
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+        "license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+        "isPartOf": {"@type": "SoftwareApplication", "name": "SKWorld", "url": "https://skworld.io"},
+        "publisher": {"@id": "https://smilintux.github.io/#organization"}
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    /* ── Reset + tokens ───────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --gold:   #FFD700;
+      --pink:   #FF69B4;
+      --cyan:   #00FFFF;
+      --green:  #50fa7b;
+      --purple: #bd93f9;
+      --bg:     #0a0a0f;
+      --bg2:    #0f1020;
+      --card:   rgba(15, 16, 40, 0.7);
+      --border: rgba(189,147,249,0.18);
+      --text:   rgba(255,255,255,0.88);
+      --dim:    rgba(255,255,255,0.55);
+      --mono:   'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    /* ── Starfield background ─────────────── */
+    .starfield {
+      position: fixed; inset: 0; z-index: -1;
+      background: radial-gradient(ellipse at 50% -10%, #1a1a3e 0%, #0d0d1f 40%, #0a0a0f 100%);
+    }
+    .stars {
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(2px 2px at 20px 30px,  rgba(255,215,0,0.9),  transparent),
+        radial-gradient(2px 2px at 40px 70px,  rgba(0,255,255,0.7),  transparent),
+        radial-gradient(1px 1px at 90px 40px,  rgba(255,255,255,0.9),transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255,105,180,0.8),transparent),
+        radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.6),transparent),
+        radial-gradient(1px 1px at 70px 55px,  rgba(189,147,249,0.7),transparent);
+      background-repeat: repeat;
+      background-size: 200px 100px;
+      animation: starscroll 100s linear infinite;
+    }
+    .stars:nth-child(2) { background-size: 270px 130px; animation-duration: 145s; animation-direction: reverse; opacity: .7; }
+    .stars:nth-child(3) { background-size: 340px 165px; animation-duration: 190s; opacity: .45; }
+    @keyframes starscroll {
+      from { transform: translateX(0)      translateY(0); }
+      to   { transform: translateX(-200px) translateY(-100px); }
+    }
+
+    /* ── Floating deco ────────────────────── */
+    .float-deco {
+      position: fixed; font-size: 1.6rem; z-index: 0; pointer-events: none;
+      animation: floatDeco 18s infinite ease-in-out;
+      opacity: .35;
+    }
+    @keyframes floatDeco {
+      0%,100% { transform: translateY(0) rotate(-4deg); opacity: .3; }
+      33%  { transform: translateY(-28px) rotate(6deg); opacity: .6; }
+      66%  { transform: translateY(-48px) rotate(-2deg); opacity: .45; }
+    }
+
+    /* ── Layout helpers ───────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 1; }
+    section { padding: 5rem 0; }
+
+    /* ── Sticky nav ───────────────────────── */
+    .site-nav {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(10, 10, 20, 0.88);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(189,147,249,0.14);
+    }
+    .nav-inner {
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1200px; margin: 0 auto; padding: .75rem 2rem;
+    }
+    .nav-logo {
+      font-family: var(--mono); font-weight: 700; font-size: 1.25rem;
+      color: var(--purple); text-decoration: none; letter-spacing: -.5px;
+    }
+    .nav-logo span { color: var(--cyan); }
+    .nav-links { display: flex; list-style: none; gap: 1.4rem; align-items: center; }
+    .nav-links a {
+      color: var(--dim); text-decoration: none; font-size: .875rem;
+      font-weight: 500; transition: color .2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--purple); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      color: #000 !important; padding: .45rem 1.2rem; border-radius: 6px;
+      font-weight: 700 !important; font-size: .85rem !important;
+    }
+    .nav-cta:hover { opacity: .85; }
+    @media (max-width: 900px) { .nav-links { display: none; } }
+
+    /* ── Cross-site sibling bar ───────────── */
+    .sibling-bar {
+      border-top: 1px solid rgba(255,255,255,.05);
+      background: rgba(0,0,0,.25);
+    }
+    .sibling-inner {
+      display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+      max-width: 1200px; margin: 0 auto; padding: .5rem 2rem;
+    }
+    .sibling-label {
+      font-family: var(--mono); font-size: .68rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--dim); margin-right: .25rem;
+    }
+    .sibling-link {
+      display: inline-flex; align-items: baseline; gap: .4rem;
+      text-decoration: none; padding: .3rem .8rem; border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.1);
+      font-size: .82rem; font-weight: 600; color: rgba(255,255,255,.72);
+      transition: all .2s;
+    }
+    .sibling-link span { font-family: var(--mono); font-size: .66rem; color: var(--dim); font-weight: 400; }
+    .sibling-link:hover { border-color: var(--cyan); color: var(--cyan); }
+    .sibling-link:hover span { color: rgba(0,255,255,.7); }
+    .sibling-link.active {
+      border-color: var(--purple); color: var(--purple);
+      background: rgba(189,147,249,.1);
+    }
+    .sibling-link.active span { color: rgba(189,147,249,.75); }
+    @media (max-width: 640px) { .sibling-label { display: none; } }
+
+    /* ── HERO ─────────────────────────────── */
+    .hero {
+      padding: 6rem 0 4.5rem;
+      text-align: center;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(189,147,249,.1) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      font-family: var(--mono); font-size: .9rem; color: var(--cyan);
+      letter-spacing: .15em; text-transform: uppercase; margin-bottom: 1.25rem;
+      display: inline-block;
+      animation: eyebrowPulse 4s ease-in-out infinite;
+    }
+    @keyframes eyebrowPulse {
+      0%,100% { text-shadow: 0 0 8px rgba(0,255,255,.4); }
+      50%      { text-shadow: 0 0 18px rgba(0,255,255,.8), 0 0 35px rgba(0,255,255,.3); }
+    }
+    .hero-title {
+      font-size: clamp(4rem, 9vw, 8rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -2px;
+      margin-bottom: .75rem;
+      background: linear-gradient(140deg, var(--purple) 0%, var(--pink) 35%, var(--cyan) 65%, var(--purple) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: titleShimmer 5s ease-in-out infinite;
+    }
+    @keyframes titleShimmer {
+      0%,100% { filter: hue-rotate(0deg); }
+      40%      { filter: hue-rotate(25deg); }
+      70%      { filter: hue-rotate(-15deg); }
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: var(--mono); font-size: .78rem; font-weight: 700;
+      padding: .35rem .9rem; border-radius: 30px;
+      background: rgba(80,250,123,.1); color: var(--green);
+      border: 1px solid rgba(80,250,123,.35);
+      letter-spacing: .04em; margin-bottom: 1.75rem;
+    }
+    .status-badge .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 10px var(--green);
+      animation: livePulse 2s ease-in-out infinite;
+    }
+    @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+    .hero-tagline {
+      font-size: clamp(1.25rem, 2.5vw, 1.7rem);
+      color: rgba(255,255,255,.8);
+      font-weight: 300;
+      max-width: 720px;
+      margin: 0 auto 1rem;
+      line-height: 1.5;
+    }
+    .hero-tagline strong { color: var(--purple); font-weight: 600; }
+    .hero-sub {
+      font-size: 1rem; color: var(--dim);
+      max-width: 620px; margin: 0 auto 2.5rem;
+    }
+
+    /* Status box (replaces install box) */
+    .status-box-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: .75rem;
+      margin-bottom: 1.75rem;
+    }
+    .status-box {
+      display: grid; grid-template-columns: auto 1fr; gap: .35rem 1rem;
+      background: rgba(0,0,0,.55);
+      border: 1.5px solid rgba(189,147,249,.35);
+      border-radius: 12px;
+      padding: 1.15rem 1.5rem;
+      max-width: 620px; width: 100%;
+      text-align: left;
+      transition: border-color .3s, box-shadow .3s;
+    }
+    .status-box:hover {
+      border-color: var(--purple);
+      box-shadow: 0 0 28px rgba(189,147,249,.22);
+    }
+    .status-box .k { font-family: var(--mono); font-size: .8rem; color: var(--dim); white-space: nowrap; }
+    .status-box .v { font-family: var(--mono); font-size: .8rem; color: rgba(255,255,255,.82); }
+    .status-box .v .ship { color: var(--green); }
+    .status-box .v .road { color: var(--gold); }
+    .status-box .v .accent { color: var(--purple); }
+
+    /* Hero CTAs */
+    .hero-ctas {
+      display: flex; justify-content: center; gap: 1rem;
+      flex-wrap: wrap; margin-top: 1rem;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .8rem 1.8rem; border-radius: 10px;
+      font-weight: 600; font-size: .95rem; text-decoration: none;
+      transition: all .25s; position: relative; overflow: hidden;
+      border: none; cursor: pointer;
+    }
+    .btn::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+      transform: translateX(-100%); transition: transform .5s;
+    }
+    .btn:hover::after { transform: translateX(100%); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--pink) 60%);
+      color: #000;
+      box-shadow: 0 4px 20px rgba(189,147,249,.35);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(189,147,249,.5); }
+    .btn-outline {
+      background: rgba(255,255,255,.04);
+      border: 1.5px solid rgba(189,147,249,.3);
+      color: rgba(255,255,255,.85);
+    }
+    .btn-outline:hover { border-color: var(--purple); background: rgba(189,147,249,.07); transform: translateY(-2px); }
+    .btn-ghost {
+      background: transparent; border: 1.5px solid rgba(255,255,255,.15);
+      color: var(--dim);
+    }
+    .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
+
+    /* Trust badges under hero */
+    .hero-trust {
+      display: flex; justify-content: center; gap: 2rem;
+      flex-wrap: wrap; margin-top: 3rem;
+      font-size: .82rem; color: var(--dim);
+    }
+    .hero-trust span { display: flex; align-items: center; gap: .4rem; }
+    .hero-trust strong { color: rgba(255,255,255,.7); }
+
+    /* ── Section headings ─────────────────── */
+    .section-eyebrow {
+      font-family: var(--mono); font-size: .8rem; color: var(--cyan);
+      letter-spacing: .15em; text-transform: uppercase; margin-bottom: .75rem;
+    }
+    .section-title {
+      font-size: clamp(1.9rem, 3.5vw, 2.8rem); font-weight: 800;
+      margin-bottom: .75rem; line-height: 1.15;
+    }
+    .section-sub { color: var(--dim); max-width: 640px; font-size: 1rem; line-height: 1.7; }
+
+    /* ── WHERE IT FITS - sibling cards ────── */
+    .fits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem; margin-top: 2.5rem;
+    }
+    .fit-card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 2rem;
+      transition: all .35s;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      display: block; text-decoration: none; color: inherit;
+    }
+    .fit-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+    }
+    .fit-card.os::before   { background: linear-gradient(90deg, #4a90d9, var(--cyan)); }
+    .fit-card.eng::before  { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+    .fit-card.client::before { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+    .fit-card.client {
+      border-color: rgba(189,147,249,.4);
+      box-shadow: 0 0 40px rgba(189,147,249,.08);
+    }
+    .fit-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.4), 0 0 35px rgba(189,147,249,.12);
+    }
+    .fit-badge {
+      display: inline-block;
+      font-family: var(--mono); font-size: .7rem; font-weight: 700;
+      padding: .2rem .6rem; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: .1em;
+      margin-bottom: 1rem;
+    }
+    .fit-badge.os     { background: rgba(74,144,217,.15); color: #6fb0ef; border: 1px solid rgba(74,144,217,.3); }
+    .fit-badge.eng    { background: rgba(80,250,123,.1); color: var(--green); border: 1px solid rgba(80,250,123,.3); }
+    .fit-badge.client { background: rgba(189,147,249,.15); color: var(--purple); border: 1px solid rgba(189,147,249,.3); }
+    .fit-icon { font-size: 2.5rem; margin-bottom: .8rem; display: block; }
+    .fit-name { font-size: 1.4rem; font-weight: 700; margin-bottom: .1rem; color: #fff; font-family: var(--mono); }
+    .fit-role { font-size: .82rem; color: var(--cyan); margin-bottom: .8rem; font-weight: 500; }
+    .fit-desc  { font-size: .925rem; color: var(--dim); line-height: 1.6; margin-bottom: 1rem; }
+    .fit-oneline {
+      font-family: var(--mono); font-size: .78rem; color: rgba(255,255,255,.7);
+      padding-top: .8rem; border-top: 1px solid rgba(255,255,255,.07);
+    }
+    .fit-oneline strong { color: var(--purple); }
+    .fit-here {
+      font-family: var(--mono); font-size: .68rem; color: var(--pink);
+      letter-spacing: .1em; text-transform: uppercase; margin-top: .6rem;
+    }
+
+    /* ── ONE-LINE RULE band ──────────────── */
+    .rule-band {
+      background: linear-gradient(135deg, rgba(189,147,249,.07) 0%, rgba(255,105,180,.05) 55%, rgba(0,255,255,.05) 100%);
+      border-top: 1px solid rgba(189,147,249,.14);
+      border-bottom: 1px solid rgba(189,147,249,.14);
+      text-align: center;
+    }
+    .rule-quote {
+      font-size: clamp(1.4rem, 3vw, 2.2rem); font-weight: 700; line-height: 1.4;
+      max-width: 860px; margin: 0 auto;
+    }
+    .rule-quote .os  { color: #6fb0ef; }
+    .rule-quote .eng { color: var(--green); }
+    .rule-quote .cli { color: var(--purple); }
+    .rule-cite { margin-top: 1.5rem; font-family: var(--mono); font-size: .82rem; color: var(--dim); }
+    .rule-cite a { color: var(--cyan); text-decoration: none; }
+    .rule-cite a:hover { color: var(--purple); }
+
+    /* ── WHAT IT IS - arch overview ───────── */
+    .gradient-section {
+      background: linear-gradient(135deg, rgba(189,147,249,.06) 0%, rgba(255,105,180,.04) 50%, rgba(0,255,255,.04) 100%);
+      border-top: 1px solid rgba(189,147,249,.1);
+      border-bottom: 1px solid rgba(189,147,249,.1);
+    }
+    .arch-wrap {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+    }
+    @media (max-width: 860px) { .arch-wrap { grid-template-columns: 1fr; } }
+    .arch-text h2 { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; margin-bottom: 1rem; }
+    .arch-text p  { color: var(--dim); line-height: 1.75; margin-bottom: 1rem; }
+    .arch-text p strong { color: rgba(255,255,255,.85); }
+    .arch-pills { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem; }
+    .arch-pill {
+      font-family: var(--mono); font-size: .78rem;
+      padding: .3rem .75rem; border-radius: 20px;
+      border: 1px solid rgba(189,147,249,.25); color: var(--purple);
+      background: rgba(189,147,249,.06);
+    }
+    .arch-diagram {
+      background: rgba(0,0,0,.5);
+      border: 1px solid rgba(189,147,249,.2);
+      border-radius: 16px; padding: 2rem;
+      font-family: var(--mono); font-size: .78rem; line-height: 1.8;
+    }
+    .arch-diagram .d-label {
+      color: var(--cyan); font-weight: 700; font-size: .82rem;
+      margin-bottom: .5rem; display: block;
+    }
+    .arch-diagram .d-row { color: rgba(255,255,255,.55); }
+    .arch-diagram .d-row strong { color: var(--purple); }
+    .arch-diagram .d-row em { color: var(--green); font-style: normal; }
+    .arch-diagram hr { border: none; border-top: 1px solid rgba(255,255,255,.08); margin: .8rem 0; }
+
+    /* ── STATUS / what ships ──────────────── */
+    .ships-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.4rem; margin-top: 3rem;
+    }
+    .ship-card {
+      background: var(--card); backdrop-filter: blur(12px);
+      border: 1.5px solid var(--border); border-radius: 16px;
+      padding: 1.75rem; transition: all .3s;
+    }
+    .ship-card:hover { transform: translateY(-6px); border-color: rgba(189,147,249,.4); box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+    .ship-card-head { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+    .ship-icon { font-size: 1.8rem; }
+    .ship-tag {
+      font-family: var(--mono); font-size: .64rem; font-weight: 700;
+      padding: .15rem .5rem; border-radius: 4px; text-transform: uppercase; letter-spacing: .08em;
+    }
+    .ship-tag.live { background: rgba(80,250,123,.12); color: var(--green); border: 1px solid rgba(80,250,123,.3); }
+    .ship-tag.road { background: rgba(255,215,0,.1); color: var(--gold); border: 1px solid rgba(255,215,0,.3); }
+    .ship-name { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: .4rem; }
+    .ship-desc { font-size: .875rem; color: var(--dim); line-height: 1.6; margin-bottom: .9rem; }
+    .ship-meta { display: flex; flex-direction: column; gap: .35rem; }
+    .ship-meta .row {
+      display: flex; justify-content: space-between; gap: .5rem;
+      font-family: var(--mono); font-size: .74rem;
+      padding: .2rem 0; border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .ship-meta .row:last-child { border-bottom: none; }
+    .ship-meta .row .mk { color: var(--dim); }
+    .ship-meta .row .mv { color: var(--purple); text-align: right; }
+
+    /* ── ROADMAP ladder ──────────────────── */
+    .ladder { max-width: 820px; margin: 3rem auto 0; }
+    .rung {
+      display: grid; grid-template-columns: auto 1fr; gap: 1.25rem;
+      padding: 1.25rem 0; border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .rung:last-child { border-bottom: none; }
+    .rung-badge {
+      font-family: var(--mono); font-size: .72rem; font-weight: 700;
+      padding: .35rem .55rem; border-radius: 6px; height: fit-content;
+      white-space: nowrap; letter-spacing: .05em;
+    }
+    .rung-badge.done { background: rgba(80,250,123,.12); color: var(--green); border: 1px solid rgba(80,250,123,.3); }
+    .rung-badge.next { background: rgba(255,215,0,.1); color: var(--gold); border: 1px solid rgba(255,215,0,.3); }
+    .rung-badge.later { background: rgba(255,255,255,.04); color: var(--dim); border: 1px solid rgba(255,255,255,.12); }
+    .rung-body h3 { font-size: 1.05rem; color: #fff; margin-bottom: .25rem; }
+    .rung-body h3 .status-ico { font-size: .85rem; }
+    .rung-body p { font-size: .875rem; color: var(--dim); line-height: 1.6; }
+    .rung-body .gate { font-family: var(--mono); font-size: .72rem; color: rgba(255,255,255,.4); margin-top: .35rem; }
+
+    /* ── ECOSYSTEM ────────────────────────── */
+    .eco-grid { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-top: 2rem; }
+    .eco-link {
+      display: inline-flex; align-items: center; gap: .45rem;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(189,147,249,.18);
+      border-radius: 24px; padding: .55rem 1.2rem;
+      font-size: .875rem; font-weight: 500;
+      color: rgba(255,255,255,.75); text-decoration: none;
+      transition: all .25s;
+    }
+    .eco-link:hover {
+      border-color: var(--purple); color: var(--purple);
+      background: rgba(189,147,249,.07); transform: translateY(-2px);
+    }
+
+    /* ── SECTION DIVIDERS ─────────────────── */
+    .section-divider { border: none; border-top: 1px solid rgba(189,147,249,.08); margin: 0; }
+
+    /* ── TERMINAL DEMO ────────────────────── */
+    .terminal {
+      background: #050508; border: 1px solid rgba(255,255,255,.1);
+      border-radius: 14px; overflow: hidden; max-width: 720px; margin: 2.5rem auto 0;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+    .term-bar { background: #1a1a2e; padding: .6rem 1rem; display: flex; align-items: center; gap: .5rem; }
+    .term-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .term-dot.r { background: #ff5f57; }
+    .term-dot.y { background: #febc2e; }
+    .term-dot.g { background: #28c840; }
+    .term-title { font-family: var(--mono); font-size: .78rem; color: var(--dim); margin-left: auto; }
+    .term-body { padding: 1.5rem; font-family: var(--mono); font-size: .85rem; line-height: 1.9; text-align: left; }
+    .t-prompt { color: var(--green); }
+    .t-cmd    { color: #fff; }
+    .t-comment{ color: rgba(255,255,255,.3); }
+    .t-out    { color: var(--dim); }
+    .t-bold   { color: var(--purple); font-weight: 700; }
+    .t-cyan   { color: var(--cyan); }
+    .t-gold   { color: var(--gold); }
+    .t-green  { color: var(--green); }
+
+    /* ── FINAL CTA ────────────────────────── */
+    .cta-section {
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 100%, rgba(189,147,249,.07) 0%, transparent 65%);
+    }
+    .cta-section h2 { font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 800; margin-bottom: 1rem; }
+
+    /* ── FOOTER ───────────────────────────── */
+    .site-footer {
+      padding: 2.5rem 0;
+      border-top: 1px solid rgba(189,147,249,.12);
+      background: rgba(0,0,0,.4);
+    }
+    .footer-inner { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+    .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem 1.5rem; }
+    .footer-links a { color: var(--dim); text-decoration: none; font-size: .875rem; transition: color .2s; }
+    .footer-links a:hover { color: var(--purple); }
+    .footer-copy { font-family: var(--mono); font-size: .8rem; color: rgba(255,255,255,.3); text-align: center; }
+    .footer-copy span { color: var(--purple); }
+
+    /* ── Responsive tweaks ─────────────────── */
+    @media (max-width: 640px) {
+      section { padding: 3.5rem 0; }
+      .container { padding: 0 1rem; }
+      .hero { padding: 4rem 0 3rem; }
+      .status-box { grid-template-columns: 1fr; }
+    }
+
+    /* ── Scroll reveal animation ─────────── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- Starfield -->
+  <div class="starfield" aria-hidden="true">
+    <div class="stars"></div>
+    <div class="stars"></div>
+    <div class="stars"></div>
+  </div>
+
+  <!-- Floating decorations -->
+  <div class="float-deco" style="top:18%;left:4%;animation-delay:0s">⌨️</div>
+  <div class="float-deco" style="top:35%;right:5%;animation-delay:4s">⚙️</div>
+  <div class="float-deco" style="top:65%;left:2.5%;animation-delay:8s">🔒</div>
+  <div class="float-deco" style="top:80%;right:9%;animation-delay:6s">✨</div>
+
+  <!-- ── NAV ─────────────────────────────────── -->
+  <nav class="site-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="https://skcode.skworld.io/" class="nav-logo">⌨️ <span>sk</span>code</a>
+      <ul class="nav-links">
+        <li><a href="#where-it-fits">Where it fits</a></li>
+        <li><a href="#what-it-is">What it is</a></li>
+        <li><a href="#status">Status</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="/docs.html">Docs</a></li>
+        <li><a href="https://skworld.io">SKWorld</a></li>
+        <li><a href="#roadmap" class="nav-cta">Read the design</a></li>
+      </ul>
+    </div>
+    <!-- Cross-site sibling nav: one engine, two front doors -->
+    <div class="sibling-bar">
+      <div class="sibling-inner" aria-label="SKWorld coding stack">
+        <span class="sibling-label">One engine, two front doors</span>
+        <a href="https://skos.skworld.io/" class="sibling-link">🧠 skos <span>operator OS</span></a>
+        <a href="https://skharness.skworld.io/" class="sibling-link">⚙️ skharness <span>engine</span></a>
+        <a href="https://skcode.skworld.io/" class="sibling-link active" aria-current="page">⌨️ skcode <span>coding client</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── HERO ─────────────────────────────────── -->
+  <header class="hero" id="top">
+    <div class="container">
+      <div class="hero-eyebrow" aria-label="Product category">Sovereign Coding Client · smilinTux ecosystem</div>
+
+      <h1 class="hero-title">skcode</h1>
+
+      <div class="status-badge" role="status">
+        <span class="dot" aria-hidden="true"></span>
+        P0 session plane SHIPPED · interactive dispatch on the roadmap
+      </div>
+
+      <p class="hero-tagline">
+        <strong>Where you code by hand.</strong><br>
+        The interactive front door to the same engine that builds autonomously.
+      </p>
+
+      <p class="hero-sub">
+        skcode is the human-facing coding client of the SKWorld stack - a thin client of the
+        <a href="https://skharness.skworld.io/" style="color:var(--cyan);text-decoration:none">skharness</a>
+        engine, never a second one. Today it ships a read-only remote session plane: from any paired
+        device, watch the live agent sessions running on your own hosts. Interactive Code + Dispatch is next.
+      </p>
+
+      <!-- Status box (honest, replaces the install one-liner) -->
+      <div class="status-box-wrap">
+        <div class="status-box" role="group" aria-label="Current shipping status">
+          <span class="k">shipped</span>
+          <span class="v"><span class="ship">✓</span> read-only remote session plane - <span class="accent">skcode-hostd</span> (P0)</span>
+          <span class="k">binds</span>
+          <span class="v">Tailscale IP only · port <span class="accent">9394</span> · capauth-gated (audience <span class="accent">skcode</span>)</span>
+          <span class="k">delivered as</span>
+          <span class="v">a distributed feature: skharness + skchat-app + skcapstone</span>
+          <span class="k">roadmap</span>
+          <span class="v"><span class="road">▸</span> interactive Code + Dispatch (spawn &amp; steer sessions)</span>
+        </div>
+        <p style="font-size:.85rem;color:var(--dim);text-align:center">
+          No standalone install yet - the code is distributed, not packaged.
+          <a href="/docs.html" style="color:var(--cyan);text-decoration:none">Read the architecture &amp; design ↗</a>
+        </p>
+      </div>
+
+      <!-- CTAs -->
+      <div class="hero-ctas">
+        <a href="/docs.html" class="btn btn-primary">
+          📐 Read the design
+        </a>
+        <a href="#where-it-fits" class="btn btn-outline">
+          Where it fits
+        </a>
+        <a href="#roadmap" class="btn btn-ghost">
+          Follow the roadmap ↓
+        </a>
+      </div>
+
+      <!-- Trust signals -->
+      <div class="hero-trust" role="list" aria-label="Key properties">
+        <span role="listitem"><span aria-hidden="true">🔒</span> <strong>Tailscale-only</strong> · never public, never 0.0.0.0</span>
+        <span role="listitem"><span aria-hidden="true">🪪</span> <strong>capauth-gated</strong> · sovereign, no OAuth relay</span>
+        <span role="listitem"><span aria-hidden="true">👁️</span> <strong>Read-only P0</strong> · zero write authority yet</span>
+        <span role="listitem"><span aria-hidden="true">📜</span> <strong>GPL-3.0</strong> · free forever</span>
+      </div>
+    </div>
+  </header>
+
+  <hr class="section-divider">
+
+  <!-- ── WHERE IT FITS ───────────────────────── -->
+  <section id="where-it-fits" aria-labelledby="fits-heading">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-eyebrow">Where it fits</div>
+        <h2 class="section-title" id="fits-heading">
+          One engine.<br>Two front doors.
+        </h2>
+        <p class="section-sub">
+          Three names, one clean boundary (ADR-0001). Personal context flows <em>down</em> as a narrow
+          task brief; it never flows <em>up</em> into a build sandbox. skcode is the front door you drive by hand.
+        </p>
+      </div>
+
+      <div class="fits-grid">
+
+        <!-- skos -->
+        <a class="fit-card os reveal" style="transition-delay:.05s" href="https://skos.skworld.io/" target="_blank" rel="noopener">
+          <span class="fit-badge os">Operator plane · knows you</span>
+          <span class="fit-icon">🧠</span>
+          <div class="fit-name">skos</div>
+          <div class="fit-role">the operator OS</div>
+          <p class="fit-desc">
+            Your single pane of glass: GTD, memory, the coord board, ITIL, scheduler, the AI-operator seat.
+            It decides <em>what</em> and <em>why</em> to build, then feeds a narrow brief to the engine.
+          </p>
+          <div class="fit-oneline"><strong>skos knows you.</strong></div>
+        </a>
+
+        <!-- skharness -->
+        <a class="fit-card eng reveal" style="transition-delay:.12s" href="https://skharness.skworld.io/" target="_blank" rel="noopener">
+          <span class="fit-badge eng">Engine plane · knows repo + task</span>
+          <span class="fit-icon">⚙️</span>
+          <div class="fit-name">skharness</div>
+          <div class="fit-role">the autocode engine</div>
+          <p class="fit-desc">
+            The one loop: assess → build → grade → twin-gate (score==5 + CI + coverage) → finalize.
+            Input is a repo and a task; output is a reviewed PR. Context-lean, runs in isolated sandboxes.
+          </p>
+          <div class="fit-oneline"><strong>skharness builds code.</strong></div>
+        </a>
+
+        <!-- skcode (current) -->
+        <div class="fit-card client reveal" style="transition-delay:.19s">
+          <span class="fit-badge client">Operator plane · session-scoped</span>
+          <span class="fit-icon">⌨️</span>
+          <div class="fit-name">skcode</div>
+          <div class="fit-role">the coding client - you are here</div>
+          <p class="fit-desc">
+            The interactive, human-facing surface. It invokes skharness for the heavy lifts rather than
+            growing its own loop. It holds session-scoped context (the open project), never the operator's full graph.
+          </p>
+          <div class="fit-oneline"><strong>skcode is where you code by hand.</strong></div>
+          <div class="fit-here">◆ this site</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ONE-LINE RULE ───────────────────────── -->
+  <section class="rule-band" aria-labelledby="rule-heading">
+    <div class="container">
+      <p class="rule-quote reveal" id="rule-heading">
+        <span class="os">skos knows you.</span>
+        <span class="eng">skharness builds code.</span>
+        <span class="cli">skcode is where you code by hand.</span>
+      </p>
+      <p class="rule-cite reveal">
+        The one-line rule from
+        <a href="https://github.com/smilinTux/sk-standards/blob/main/decisions/ADR-0001-skos-skharness-skcode-layering.md" target="_blank" rel="noopener">ADR-0001</a>
+        · one engine, two front doors
+      </p>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ── WHAT IT IS ──────────────────────────── -->
+  <section id="what-it-is" class="gradient-section" aria-labelledby="what-heading">
+    <div class="container">
+      <div class="arch-wrap">
+
+        <div class="arch-text reveal">
+          <div class="section-eyebrow">Architecture</div>
+          <h2 id="what-heading">A thin client, not a second engine.</h2>
+          <p>
+            <strong>The engine lives in one place.</strong> The assess/build/grade/gate/merge loop is
+            <code>skharness</code> and nowhere else. skcode is a <em>consumer</em> of it - when it dispatches an
+            autonomous build, it calls <code>skharness.autocode</code>, a thin call, never a re-forked loop.
+          </p>
+          <p>
+            <strong>skcode's host daemon IS skharness</strong>, promoted and hardened. skharness became a
+            <em>two-plane</em> Harness: the <strong>task plane</strong> is autocode (repo + brief → PR); the
+            <strong>session plane</strong> is skcode (remote control over your live agent sessions). One contract, two planes.
+          </p>
+          <p>
+            <strong>Session-scoped, never the whole graph.</strong> A skcode session knows the open project.
+            It does not load your GTD, memory, 40+ MCP servers, or soul - that is skos's job, and keeping it out
+            is what makes the surface fast and the blast radius small.
+          </p>
+          <div class="arch-pills">
+            <span class="arch-pill">Tailscale</span>
+            <span class="arch-pill">capauth</span>
+            <span class="arch-pill">two-plane Harness</span>
+            <span class="arch-pill">PTY + tmux</span>
+            <span class="arch-pill">WebSocket stream</span>
+            <span class="arch-pill">GPL-3.0</span>
+          </div>
+        </div>
+
+        <div class="arch-diagram reveal" style="transition-delay:.15s" aria-label="Architecture diagram">
+          <span class="d-label">skcode ⇄ skharness</span>
+          <div class="d-row"><strong>skcode-hostd</strong> <em>→</em> the session plane (one per host)</div>
+          <div class="d-row"><strong>Harness</strong>      <em>→</em> the shared two-plane contract</div>
+          <hr>
+          <div class="d-row"><strong>task plane</strong>  → autocode: repo + brief → reviewed PR</div>
+          <div class="d-row"><strong>session plane</strong> → skcode: list · stream · (soon) steer</div>
+          <div class="d-row"><strong>transport</strong>   → Tailscale IP only · <em>:9394</em></div>
+          <div class="d-row"><strong>auth</strong>       → capauth · audience <em>skcode</em></div>
+          <div class="d-row"><strong>client</strong>     → web page · Flutter Code pane</div>
+          <div class="d-row"><strong>operator</strong>   → Atlas watches + steers hostd</div>
+          <hr>
+          <div class="d-row" style="color:rgba(255,255,255,.3);font-size:.73rem">
+            dispatch (P2) → <em>skharness.autocode.ratify</em> · a thin call, not a fork
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ── STATUS: WHAT SHIPS TODAY ────────────── -->
+  <section id="status" aria-labelledby="status-heading">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-eyebrow">Reality, not aspiration</div>
+        <h2 class="section-title" id="status-heading">What ships today.</h2>
+        <p class="section-sub">
+          skcode is real, delivered as a <strong>distributed feature</strong>: there is no single skcode package
+          yet - the code lives across three repos that already ship. Here is exactly what is running.
+        </p>
+      </div>
+
+      <div class="ships-grid">
+
+        <!-- daemon -->
+        <div class="ship-card reveal" style="transition-delay:.05s">
+          <div class="ship-card-head">
+            <span class="ship-icon">🛰️</span>
+            <span class="ship-tag live">● shipped · P0</span>
+          </div>
+          <div class="ship-name">Host daemon (session plane)</div>
+          <p class="ship-desc">
+            <code>skcode-hostd</code> lives <em>inside</em> skharness by design. Read-only MVP: list your live
+            agent sessions and stream one transcript. Zero write authority - no spawn, inject, or kill exists yet.
+          </p>
+          <div class="ship-meta">
+            <div class="row"><span class="mk">entry</span><span class="mv">skharness.serve:main</span></div>
+            <div class="row"><span class="mk">bind</span><span class="mv">Tailscale · :9394</span></div>
+            <div class="row"><span class="mk">unit</span><span class="mv">skcode-hostd.service</span></div>
+            <div class="row"><span class="mk">tests</span><span class="mv">36 · TDD, green</span></div>
+          </div>
+        </div>
+
+        <!-- client -->
+        <div class="ship-card reveal" style="transition-delay:.12s">
+          <div class="ship-card-head">
+            <span class="ship-icon">📱</span>
+            <span class="ship-tag live">● shipped · Grade B</span>
+          </div>
+          <div class="ship-name">Flutter client pane</div>
+          <p class="ship-desc">
+            A "Code" pane in skchat-app embeds the hostd web client same-origin over the 443 funnel. Renders the
+            session list and live transcript; gated until this device is paired (shown as a hint, never a crash).
+          </p>
+          <div class="ship-meta">
+            <div class="row"><span class="mk">repo</span><span class="mv">skchat-app</span></div>
+            <div class="row"><span class="mk">path</span><span class="mv">lib/features/skcode/</span></div>
+            <div class="row"><span class="mk">files</span><span class="mv">skcode_pane · web_embed</span></div>
+            <div class="row"><span class="mk">grade</span><span class="mv">B embed → A native (later)</span></div>
+          </div>
+        </div>
+
+        <!-- adapter -->
+        <div class="ship-card reveal" style="transition-delay:.19s">
+          <div class="ship-card-head">
+            <span class="ship-icon">🛠️</span>
+            <span class="ship-tag live">● shipped</span>
+          </div>
+          <div class="ship-name">Operator adapter</div>
+          <p class="ship-desc">
+            Atlas, the AI-operator seat in skcapstone, watches and steers <code>skcode-hostd</code> as a first-class
+            operand: probe health, archive a stale session, restart the daemon, and (once dispatch lands) hit the emergency brake.
+          </p>
+          <div class="ship-meta">
+            <div class="row"><span class="mk">repo</span><span class="mv">skcapstone</span></div>
+            <div class="row"><span class="mk">path</span><span class="mv">operator_seat/skcode_adapter.py</span></div>
+            <div class="row"><span class="mk">verbs</span><span class="mv">explain · observe · act</span></div>
+            <div class="row"><span class="mk">brake</span><span class="mv">pause-dispatch (when P2 lands)</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <p class="reveal" style="margin-top:2rem;text-align:center;color:var(--dim);font-size:.9rem;max-width:720px;margin-left:auto;margin-right:auto">
+        No standalone <code>skcode</code> repo or package exists yet. The daemon is skharness, the client is skchat-app,
+        the operator adapter is skcapstone. That distribution is deliberate - the daemon is skharness promoted, not a fork.
+      </p>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ── LIVE DEMO (read-only) ───────────────── -->
+  <section class="gradient-section" aria-label="Read-only session view">
+    <div class="container" style="text-align:center">
+      <div class="reveal">
+        <div class="section-eyebrow">The P0 experience</div>
+        <h2 class="section-title">Watch your sessions. Read-only, for now.</h2>
+        <p class="section-sub" style="margin:0 auto">
+          From a paired device on your tailnet, list the agent sessions on a host and stream one live.
+          Every byte stays on hardware you own. No inject box, no spawn button - that authority does not exist yet.
+        </p>
+      </div>
+
+      <div class="terminal reveal" style="transition-delay:.1s" role="img" aria-label="Terminal showing a read-only skcode session view">
+        <div class="term-bar">
+          <div class="term-dot r"></div>
+          <div class="term-dot y"></div>
+          <div class="term-dot g"></div>
+          <span class="term-title">skcode · read-only session plane</span>
+        </div>
+        <div class="term-body">
+          <div><span class="t-prompt">$ </span><span class="t-cmd">skcode-hostd --host 100.86.156.5</span> <span class="t-comment"># Tailscale IP only</span></div>
+          <div class="t-out">   ⌨️  skcode-hostd · session plane · bound 100.86.156.5:<span class="t-bold">9394</span></div>
+          <div class="t-out">   auth: capauth · audience <span class="t-bold">skcode</span> · fail-closed ✓</div>
+          <br>
+          <div class="t-cyan">GET /api/v1/sessions</div>
+          <div class="t-out">   <span class="t-green">●</span> <span class="t-bold">lumina-4a91</span>  claude-code · feat/skcode-p2  <span class="t-comment">· 2m ago</span></div>
+          <div class="t-out">   <span class="t-green">●</span> <span class="t-bold">opus-7c02</span>    claude-code · main            <span class="t-comment">· 12m ago</span></div>
+          <div class="t-out">   <span style="color:#555">○</span> <span class="t-out">artisan-1d55</span> ended     · skchat-app        <span class="t-comment">· 1h ago</span></div>
+          <br>
+          <div class="t-cyan">WS /api/v1/sessions/lumina-4a91/stream?token=…</div>
+          <div class="t-out">   <span class="t-gold">assistant</span> running the twin gate on the diff…</div>
+          <div class="t-out">   <span class="t-gold">tool</span>      pytest -q  →  <span class="t-green">338 passed, 1 skipped</span></div>
+          <div class="t-out">   <span class="t-gold">status</span>    awaiting review</div>
+          <br>
+          <div class="t-comment">   # read-only: no /inject, no /dispatch, POST/DELETE → 405. By design.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ── ROADMAP ─────────────────────────────── -->
+  <section id="roadmap" aria-labelledby="roadmap-heading">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-eyebrow">The phase ladder</div>
+        <h2 class="section-title" id="roadmap-heading">Honest roadmap.</h2>
+        <p class="section-sub">
+          Each phase is standalone-shippable and security-reviewable on its own. The highest-risk surface - spawning
+          a session on your machine - deliberately does not exist until pairing and authorization land under it.
+        </p>
+      </div>
+
+      <div class="ladder">
+        <div class="rung reveal">
+          <span class="rung-badge done">P0 · DONE</span>
+          <div class="rung-body">
+            <h3>Read-only Code <span class="status-ico">✓</span></h3>
+            <p>List live sessions and stream one, capauth-gated, one paired device, <code>sandbox</code> scope. Zero write authority. Shipped as the skcode-hostd session plane.</p>
+            <div class="gate">gate: skharness P0 (exists) + a paired device</div>
+          </div>
+        </div>
+
+        <div class="rung reveal">
+          <span class="rung-badge next">P1 · NEXT</span>
+          <div class="rung-body">
+            <h3>Input injection</h3>
+            <p>Text, voice (Whisper), and file inject; manual/auto approval toggle; per-session model switch through the shared resolver; rename, archive, share. Still one host.</p>
+            <div class="gate">gate: unified resolver + dynamic catalog landed · authz.decide interface frozen</div>
+          </div>
+        </div>
+
+        <div class="rung reveal">
+          <span class="rung-badge later">P2 · Dispatch</span>
+          <div class="rung-body">
+            <h3>Code + Dispatch</h3>
+            <p>Spawn and steer a brand-new session (harness, repo, branch, profile, prompt) from a paired device. Gated dispatch calls <code>skharness.autocode.ratify</code> - a thin call into the engine, never a re-forked loop. Mandatory RCE guards: argv-only, repo allowlist, worktree isolation.</p>
+            <div class="gate">gate: capauth.pairing (M2) live + authz.decide (M3) + repo allowlist</div>
+          </div>
+        </div>
+
+        <div class="rung reveal">
+          <span class="rung-badge later">P3 · Fleet</span>
+          <div class="rung-body">
+            <h3>Harness axis + fleet</h3>
+            <p>Pi and opencode adapters behind the seam; harness switch = fork/re-spawn; roll <code>skcode-hostd</code> across the fleet with cross-host session merge; skcoord card store for background tasks.</p>
+            <div class="gate">gate: Pi spike + fleet install · skcoord extraction</div>
+          </div>
+        </div>
+
+        <div class="rung reveal">
+          <span class="rung-badge later">P4 · Off-tailnet + shell</span>
+          <div class="rung-body">
+            <h3>Cellular attach + Grade A</h3>
+            <p>skcomms <code>stream_channel</code> for off-tailnet / cellular attach (reusing the skchat coturn relay); skcode promoted to a Grade A native module in the SKWorld shell.</p>
+            <div class="gate">gate: shell phase + skcomms stream seam</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal" style="text-align:center;margin-top:2.5rem">
+        <a href="/docs.html" class="btn btn-primary">📐 Read the full design</a>
+        <a href="https://github.com/smilinTux/sk-standards/blob/main/decisions/ADR-0001-skos-skharness-skcode-layering.md" class="btn btn-outline" target="_blank" rel="noopener">📄 ADR-0001</a>
+      </div>
+      <p class="reveal" style="text-align:center;margin-top:1.25rem;font-family:var(--mono);font-size:.78rem;color:var(--dim)">
+        Tracked as coord card <span style="color:var(--purple)">22731c0d</span> · reconciled to ADR-0001
+      </p>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ── ECOSYSTEM ───────────────────────────── -->
+  <section id="ecosystem" class="gradient-section" aria-labelledby="eco-heading">
+    <div class="container" style="text-align:center">
+      <div class="reveal">
+        <div class="section-eyebrow">The SKWorld family</div>
+        <h2 class="section-title" id="eco-heading">Part of the smilinTux ecosystem</h2>
+        <p class="section-sub" style="margin:0 auto 1rem">
+          skcode is the coding front door of the <strong>SKWorld sovereign AI ecosystem</strong>. Its siblings run
+          the OS layer (skos) and the autocode engine (skharness). Build on any of them, or let the stack wire them together.
+        </p>
+      </div>
+      <div class="eco-grid reveal" style="transition-delay:.1s">
+        <a href="https://skos.skworld.io"      class="eco-link" target="_blank" rel="noopener">🧠 skos</a>
+        <a href="https://skharness.skworld.io" class="eco-link" target="_blank" rel="noopener">⚙️ skharness</a>
+        <a href="https://skworld.io"           class="eco-link" target="_blank" rel="noopener">🌍 skworld.io</a>
+        <a href="https://sksecurity.io"        class="eco-link" target="_blank" rel="noopener">🛡️ sksecurity.io</a>
+        <a href="https://capauth.io"           class="eco-link" target="_blank" rel="noopener">🔐 capauth.io</a>
+        <a href="https://skmemory.io"          class="eco-link" target="_blank" rel="noopener">🧠 skmemory.io</a>
+        <a href="https://github.com/smilinTux" class="eco-link" target="_blank" rel="noopener">🐧 GitHub</a>
+        <a href="https://lumina.skworld.io"    class="eco-link" target="_blank" rel="noopener">✨ Lumina</a>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ── FINAL CTA ───────────────────────────── -->
+  <section class="cta-section" aria-labelledby="cta-heading">
+    <div class="container" style="text-align:center">
+      <div class="reveal">
+        <div style="font-size:3rem;margin-bottom:1rem">⌨️</div>
+        <h2 id="cta-heading">Follow the build.</h2>
+        <p style="color:var(--dim);margin:.75rem auto 2.5rem;max-width:560px;font-size:1.05rem">
+          The session plane ships today; interactive dispatch is next. Nothing installs standalone yet -
+          read the design, watch the roadmap, and own the whole coding surface when it lands.
+        </p>
+        <div class="hero-ctas">
+          <a href="/docs.html" class="btn btn-primary">📐 Read the design</a>
+          <a href="https://github.com/smilinTux/sk-standards/blob/main/decisions/ADR-0001-skos-skharness-skcode-layering.md" class="btn btn-outline" target="_blank" rel="noopener">📄 ADR-0001</a>
+          <a href="https://skworld.io" class="btn btn-ghost" target="_blank" rel="noopener">🌍 Explore SKWorld</a>
+        </div>
+        <p style="margin-top:2rem;font-family:var(--mono);font-size:.85rem;color:rgba(189,147,249,.6)">
+          "staycuriousANDkeepsmilin" 🐧
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ──────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-links" role="list" aria-label="Ecosystem links">
+          <a href="https://skos.skworld.io" role="listitem">🧠 skos</a>
+          <a href="https://skharness.skworld.io" role="listitem">⚙️ skharness</a>
+          <a href="https://skworld.io" role="listitem">🌍 SKWorld</a>
+          <a href="https://sksecurity.io" role="listitem">🛡️ SKSecurity</a>
+          <a href="https://capauth.io" role="listitem">🔐 CapAuth</a>
+          <a href="https://github.com/smilinTux" role="listitem">📦 GitHub</a>
+          <a href="https://lumina.skworld.io" role="listitem">✨ Lumina</a>
+          <a href="https://smilintux.org" role="listitem">🐧 smilinTux</a>
+        </div>
+        <div class="footer-copy">
+          &copy; 2026 SKWorld · Sovereign Technology for Creators ·
+          <span>staycuriousANDkeepsmilin</span> ·
+          GPL-3.0 · <a href="https://github.com/smilinTux" style="color:var(--dim)">smilinTux</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── Scripts ─────────────────────────────── -->
+  <script>
+    // Scroll reveal
+    (function() {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    })();
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

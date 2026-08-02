@@ -1,0 +1,83 @@
+# skcode - The Sovereign Coding Client
+
+> Where you code by hand. The interactive, human-facing coding client of the SKWorld stack -
+> a thin client of the skharness engine, never a second engine. Its read-only remote session
+> plane ships today (skcode-hostd, P0); interactive Code + Dispatch is on the roadmap. GPL-3.0.
+
+skcode is one of three names in the SKWorld coding stack, and the boundary between them is the
+point (ADR-0001). One engine, two front doors:
+
+- **skos** (skos.skworld.io) - the operator OS. It knows you: GTD, memory, coord board, ITIL,
+  scheduler, the AI-operator seat. It decides what and why to build.
+- **skharness** (skharness.skworld.io) - the autocode engine. The one loop: assess → build →
+  grade → twin-gate (score==5 + CI + coverage) → finalize/merge. Input: a repo + a task.
+  Output: a reviewed PR. Knows only the repo and the task, runs in isolated sandboxes.
+- **skcode** (skcode.skworld.io) - the coding client. The interactive surface where a human codes
+  by hand. It invokes skharness for autonomous builds rather than growing its own loop. It holds
+  session-scoped context (the open project), never the operator's full personal graph.
+
+The one-line rule: **skos knows you. skharness builds code. skcode is where you code by hand.**
+
+## Honest status (this is important)
+
+skcode is REAL, delivered today as a DISTRIBUTED feature. There is NO standalone skcode package
+or repo yet - the code lives across three repos that already ship:
+
+- **skcode host daemon (session plane) - SHIPPED, P0 read-only MVP.** Lives INSIDE skharness by
+  deliberate design ("skcode's host daemon IS skharness, promoted and hardened"). Entry point
+  `skcode-hostd` (= `skharness.serve:main`), binds a Tailscale IP only on port 9394, capauth-gated
+  with audience `skcode`, systemd unit `skcode-hostd.service`, 36 tests. It is the "session plane"
+  of the two-plane Harness: the task plane is autocode, the session plane is skcode remote session
+  control. Read-only: list live agent sessions and stream one; no inject, spawn, or kill exists
+  (POST/DELETE return 405, by design).
+- **Flutter client pane - SHIPPED (Grade B).** A "Code" pane in skchat-app
+  (`lib/features/skcode/`) embeds the hostd web client same-origin over the 443 funnel.
+- **Operator adapter - SHIPPED.** `skcapstone/operator_seat/skcode_adapter.py`; Atlas (the
+  AI-operator seat) watches and steers hostd (health, archive stale session, restart, pause dispatch).
+
+STILL ON THE ROADMAP: interactive Code + Dispatch (P2) - spawn and steer sessions, with a gated
+dispatch that calls `skharness.autocode.ratify` (a thin call into the engine, never a re-forked loop).
+
+## Architecture
+
+skcode is a thin client of skharness, not a second engine. skharness became a TWO-PLANE Harness:
+
+- **Task plane** - autocode. A repo + a brief become a reviewed PR in an isolated Docker sandbox.
+- **Session plane** - skcode. Remote control over live agent sessions over a PTY + tmux backing.
+
+Two separate Harness classes on one ABC, so turning on the session plane never touches the frozen
+autocode adapter. skcode's daemon is skharness promoted and hardened; the engine is untouched.
+
+## The phase ladder
+
+| Phase | Deliverable | Gate |
+|-------|-------------|------|
+| P0 (DONE) | Read-only Code: list + stream, capauth-gated, one device, sandbox scope. | skharness P0 + a paired device. |
+| P1 (next) | Input injection (text/voice/file), manual/auto toggle, per-session model switch, rename/archive/share. | Unified resolver + dynamic catalog; authz.decide frozen. |
+| P2 (Dispatch) | Spawn & steer a new session; gated dispatch → skharness.autocode.ratify; mandatory RCE guards. | capauth.pairing (M2) + authz.decide (M3) + repo allowlist. |
+| P3 (Fleet) | Pi + opencode adapters; harness switch = fork/re-spawn; fleet roll; cross-host merge; skcoord card store. | Pi spike + fleet install; skcoord extraction. |
+| P4 (Off-tailnet + shell) | skcomms stream_channel for cellular attach; skcode as a Grade A shell module. | Shell phase + skcomms stream seam. |
+
+## Security posture
+
+skcode is remote code execution on your own hosts, so it is security-first from P0: Tailscale-only
+binding (refuses 0.0.0.0 and public Funnel ports), capauth-gated and fail-closed (audience `skcode`),
+read-only P0 (the write surface does not exist yet), least-privilege by construction (a sandbox
+session gets no SKAGENT / sk* MCP / memory - enforced by not wiring the modules), and P2 RCE guards
+(argv-only subprocess, repo allowlist, name charset limits, git-worktree isolation, prompt-as-data).
+
+## Links
+
+- [Live site](https://skcode.skworld.io)
+- [Docs](https://skcode.skworld.io/docs.html)
+- [ADR-0001 - skos/skharness/skcode layering](https://github.com/smilinTux/sk-standards/blob/main/decisions/ADR-0001-skos-skharness-skcode-layering.md)
+- Design spec: docs/superpowers/specs/2026-07-25-skcode-remote-control-dispatch-design.md
+- Tracking: coord card 22731c0d (reconciled to ADR-0001)
+- Siblings: [skos](https://skos.skworld.io) · [skharness](https://skharness.skworld.io)
+- [SKWorld ecosystem](https://skworld.io) · [CapAuth](https://capauth.io) · [GitHub](https://github.com/smilinTux)
+
+## About smilinTux
+
+skcode is part of the **smilinTux sovereign AI ecosystem** - a suite of open-source tools built by
+King Divad (Chef/David) and Lumina to give humans and AI agents genuine, authentic infrastructure
+they can own and trust. No corporate robotics. No black-box clouds. GPL-3.0 forever.
