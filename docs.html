@@ -458,6 +458,12 @@ flowchart TD
           <strong>skcode is the interactive front door</strong> in this diagram (the purple node). It sends
           "build this / fix this" to skharness exactly as skos sends its distilled brief - same engine, driven by a human.
         </p>
+        <p class="diagram-note">
+          A second, explorable view of the same shape, scoped to skcode's own session plane (pan, zoom, dark/light
+          toggle): <a href="diagrams/skcode.architecture.html" target="_blank" rel="noopener">Open the interactive architecture diagram ↗</a>.
+          It covers what ships today (skcode-hostd's read-only session plane, Tailscale-only, capauth-gated) and draws
+          input injection and dispatch as dashed roadmap connections, matching the phase ladder below.
+        </p>
 
         <h2 id="workflow">The autocode workflow (where you are in the system)</h2>
         <p>
