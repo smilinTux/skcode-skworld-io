@@ -1,0 +1,249 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "skcode: a thin client of the skharness engine",
+    "subtitle": "Read-only session plane shipped today (P0); input injection and dispatch are roadmap, drawn dashed. Derived from skcode-skworld-io's own index.html and the skharness SOP architecture diagram.",
+    "output": "skcode.architecture.html",
+    "quality_profile": "showcase"
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [
+      60,
+      60
+    ],
+    "cols": 4,
+    "gapX": 160,
+    "gapY": 100,
+    "cellW": 240,
+    "cellH": 90
+  },
+  "components": [
+    {
+      "id": "client",
+      "type": "frontend",
+      "label": "Operator phone / browser",
+      "sublabel": "Flutter Code pane in skchat-app",
+      "row": 0,
+      "col": 0,
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "atlas",
+      "type": "frontend",
+      "label": "Atlas operator adapter",
+      "sublabel": "skcapstone operator_seat",
+      "row": 0,
+      "col": 1,
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "hostd",
+      "type": "backend",
+      "label": "skcode-hostd",
+      "sublabel": "serve.py + daemon.py, port 9394",
+      "row": 1,
+      "col": 0,
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Bearer + scope gate",
+      "sublabel": "auth.py AuthContext",
+      "row": 1,
+      "col": 1,
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "session_store",
+      "type": "database",
+      "label": "Session event store",
+      "sublabel": "append-only SessionEventStore",
+      "row": 2,
+      "col": 1,
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "capauth_verify",
+      "type": "security",
+      "label": "capauth: verify_audience_token",
+      "sublabel": "audience = skcode",
+      "row": 2,
+      "col": 2,
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "capauth_pdp",
+      "type": "security",
+      "label": "capauth PDP",
+      "sublabel": "authz.decide, VERIFIED floor",
+      "row": 2,
+      "col": 3,
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "autocode engine",
+      "sublabel": "skharness task plane (roadmap target)",
+      "row": 3,
+      "col": 0,
+      "size": [
+        220,
+        72
+      ]
+    },
+    {
+      "id": "dispatch_sandbox",
+      "type": "cloud",
+      "label": "Dispatch worktree + sandbox",
+      "sublabel": "per-card git worktree + docker",
+      "row": 3,
+      "col": 1,
+      "size": [
+        220,
+        72
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Paired client devices (Tailscale)",
+      "wraps": [
+        "client",
+        "atlas"
+      ],
+      "pad": 22
+    },
+    {
+      "kind": "security-group",
+      "label": "skcode-hostd: skharness session plane (tailnet-only, port 9394)",
+      "wraps": [
+        "hostd",
+        "auth",
+        "session_store"
+      ],
+      "pad": 26
+    },
+    {
+      "kind": "security-group",
+      "label": "capauth (separate repo): the PDP for this surface",
+      "wraps": [
+        "capauth_verify",
+        "capauth_pdp"
+      ],
+      "pad": 22
+    },
+    {
+      "kind": "region",
+      "label": "Roadmap: Code + Dispatch (P1 inject, P2 dispatch), not yet exercised by skcode",
+      "wraps": [
+        "engine",
+        "dispatch_sandbox"
+      ],
+      "pad": 22
+    }
+  ],
+  "connections": [
+    {
+      "id": "client-to-hostd",
+      "from": "client",
+      "to": "hostd",
+      "label": "session list + live stream (Bearer, Tailscale)",
+      "variant": "default"
+    },
+    {
+      "id": "atlas-to-hostd",
+      "from": "atlas",
+      "to": "hostd",
+      "label": "operator_cli: explain / observe / act",
+      "variant": "default"
+    },
+    {
+      "id": "hostd-to-auth",
+      "from": "hostd",
+      "to": "auth",
+      "label": "every route scope-checked",
+      "variant": "default"
+    },
+    {
+      "id": "auth-to-verify",
+      "from": "auth",
+      "to": "capauth_verify",
+      "label": "verify_audience_token (skcode)",
+      "variant": "security"
+    },
+    {
+      "id": "hostd-to-store",
+      "from": "hostd",
+      "to": "session_store",
+      "label": "read-only session + transcript",
+      "variant": "default"
+    },
+    {
+      "id": "auth-to-pdp",
+      "from": "auth",
+      "to": "capauth_pdp",
+      "label": "inject / dispatch: authz.decide (P1/P2)",
+      "variant": "dashed"
+    },
+    {
+      "id": "pdp-to-engine",
+      "from": "capauth_pdp",
+      "to": "engine",
+      "label": "P2: autocode.ratify (thin call)",
+      "variant": "dashed"
+    },
+    {
+      "id": "engine-to-dispatch",
+      "from": "engine",
+      "to": "dispatch_sandbox",
+      "label": "dispatch allowlist; empty = deny all",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Ships today (P0)",
+      "items": [
+        "Read-only session list and live transcript stream, Bearer-gated and capauth-verified (audience skcode)",
+        "Tailnet-only: no public route, no :443 vhost, no Cloudflare Tunnel or Funnel",
+        "Delivered as a distributed feature across three repos: skharness (skcode-hostd daemon), skchat-app (Flutter Code pane), skcapstone (Atlas operator adapter)"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Roadmap, not yet shipped for skcode",
+      "items": [
+        "P1: input injection (text, voice, file) behind the skcode.inject scope",
+        "P2: Code + Dispatch, spawning a new session via skharness.autocode.ratify, gated by the SKCODE_DISPATCH_REPOS allowlist (empty means deny all)",
+        "The dashed connections above exist as code-level routes in skharness today, but the skcode client and Atlas adapter do not yet exercise them, per the site's own honest roadmap framing"
+      ]
+    }
+  ]
+}
